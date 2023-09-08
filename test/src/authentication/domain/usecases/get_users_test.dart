@@ -5,11 +5,11 @@ import 'package:tdd_tutorial/src/authentication/domain/entities/user.dart';
 import 'package:tdd_tutorial/src/authentication/domain/repositories/auth_repo.dart';
 import 'package:tdd_tutorial/src/authentication/domain/usecases/get_users.dart';
 
-class MockAuthRepo extends Mock implements IAuthenticationRepository {}
+import 'auth_repo.mock.dart';
 
 void main() {
+  late IAuthenticationRepository repository;
   late GetUsers usecase;
-  late MockAuthRepo repository;
 
   setUp(() {
     repository = MockAuthRepo();
@@ -18,7 +18,7 @@ void main() {
 
   const testUsers = [User.empty()];
   test(
-    'should call the [AuthRepo.getUsers]  and return a list of users from the repository',
+    'should call the [AuthRepo.getUsers] and return a list of users from the repository',
     () async {
       // arrange
 
