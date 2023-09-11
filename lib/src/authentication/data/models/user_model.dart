@@ -26,8 +26,7 @@ class UserModel extends User {
           name: map['name'] as String,
           avatar: map['avatar'] as String,
         );
-  factory UserModel.fromJson(String json) =>
-      UserModel.fromMap(jsonDecode(json) as DataMap);
+  factory UserModel.fromJson(String json) => UserModel.fromMap(jsonDecode(json) as DataMap);
 
   DataMap toMap() => {
         'id': id,
