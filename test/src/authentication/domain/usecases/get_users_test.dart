@@ -16,7 +16,7 @@ void main() {
     usecase = GetUsers(repository);
   });
 
-  const testUsers = [User.empty()];
+  const tUsers = [User.empty()];
   test(
     'should call the [AuthRepo.getUsers] and return a list of users from the repository',
     () async {
@@ -25,13 +25,13 @@ void main() {
       //STUB
       when(
         () => repository.getUsers(),
-      ).thenAnswer((_) async => const Right(testUsers));
+      ).thenAnswer((_) async => const Right(tUsers));
 
       // act
       final result = await usecase();
 
       // assert
-      expect(result, const Right<dynamic, List<User>>(testUsers));
+      expect(result, const Right<dynamic, List<User>>(tUsers));
       verify(
         () => repository.getUsers(),
       ).called(1);
