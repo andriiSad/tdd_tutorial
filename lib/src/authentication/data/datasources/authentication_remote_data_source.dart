@@ -20,7 +20,8 @@ abstract class IAuthenticationRemoteDataSource {
 const kCreateUserEndpoint = '/users';
 const kGetUsersEndpoint = '/users';
 
-class AuthenticationRemoteDataSourceImpl implements IAuthenticationRemoteDataSource {
+class AuthenticationRemoteDataSourceImpl
+    implements IAuthenticationRemoteDataSource {
   AuthenticationRemoteDataSourceImpl(this._client);
 
   final http.Client _client;
@@ -34,31 +35,54 @@ class AuthenticationRemoteDataSourceImpl implements IAuthenticationRemoteDataSou
     // the response code is valid
     //2. check to make sure that it throws an custom exception with
     // the right message when the response code is not valid
-    final response = await _client.post(Uri.parse('$kBaseUrl$kCreateUserEndpoint'),
-        body: jsonEncode(
-          {
-            'createdAt': createdAt,
-            'name': name,
-            'avatar': avatar,
-          },
-        ));
-    if (response.statusCode != 200 && response.statusCode != 201) {
+    try {
+      final response =
+          await _client.post(Uri.https(kBaseUrl, kCreateUserEndpoint),
+              body: jsonEncode(
+                {
+                  'createdAt': createdAt,
+                  'name': name,
+                  'avatar': avatar,
+                },
+              ));
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw APIException(
+          message: response.body,
+          statusCode: response.statusCode,
+        );
+      }
+    } on APIException {
+      rethrow;
+    } catch (e) {
       throw APIException(
-        message: response.body,
-        statusCode: response.statusCode,
+        message: e.toString(),
+        statusCode: 505,
       );
     }
   }
 
   @override
   Future<List<UserModel>> getUsers() async {
-    final response = await _client.get(Uri.parse('$kBaseUrl$kGetUsersEndpoint'));
-    if (response.statusCode != 200) {
+    try {
+      final response = await _client.get(
+        Uri.https(kBaseUrl, kGetUsersEndpoint),
+      );
+      if (response.statusCode != 200) {
+        throw APIException(
+          message: response.body,
+          statusCode: response.statusCode,
+        );
+      }
+      return (json.decode(response.body) as List<dynamic>)
+          .map((userData) => UserModel.fromJson(userData as String))
+          .toList();
+    } on APIException {
+      rethrow;
+    } catch (e) {
       throw APIException(
-        message: response.body,
-        statusCode: response.statusCode,
+        message: e.toString(),
+        statusCode: 505,
       );
     }
-    throw UnimplementedError();
   }
 }
