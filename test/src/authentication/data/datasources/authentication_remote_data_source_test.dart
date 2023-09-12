@@ -28,11 +28,18 @@ void main() {
     });
 
     const params = CreateUserParams.empty();
-    test('should complete successfully when the status code is 200 or 201',
-        () async {
+    const tHeaders = {
+      'Content-Type': 'application/json',
+    };
+    test('should complete successfully when the status code is 200 or 201', () async {
       //arrange
-      when(() => client.post(any(), body: any(named: 'body'))).thenAnswer(
-          (_) async => http.Response('User created successfully', 201));
+      when(
+        () => client.post(
+          any(),
+          body: any(named: 'body'),
+          headers: tHeaders,
+        ),
+      ).thenAnswer((_) async => http.Response('User created successfully', 201));
       //act
       final methodCall = remoteDataSource.createUser;
       //assert
@@ -44,14 +51,17 @@ void main() {
           ),
           completes);
       verify(
-        () => client.post(Uri.https(kBaseUrl, kCreateUserEndpoint),
-            body: jsonEncode(
-              {
-                'createdAt': params.createdAt,
-                'name': params.name,
-                'avatar': params.avatar,
-              },
-            )),
+        () => client.post(
+          Uri.https(kBaseUrl, kCreateUserEndpoint),
+          body: jsonEncode(
+            {
+              'createdAt': params.createdAt,
+              'name': params.name,
+              'avatar': params.avatar,
+            },
+          ),
+          headers: tHeaders,
+        ),
       ).called(1);
 
       verifyNoMoreInteractions(client);
@@ -60,8 +70,8 @@ void main() {
       'should throw [APIException] when the status code is not 200 or 201',
       () async {
         // arrange
-        when(() => client.post(any(), body: any(named: 'body'))).thenAnswer(
-            (_) async => http.Response('Invalid email address', 400));
+        when(() => client.post(any(), body: any(named: 'body'), headers: tHeaders))
+            .thenAnswer((_) async => http.Response('Invalid email address', 400));
         // act
         final methodCall = remoteDataSource.createUser;
         // assert
@@ -78,14 +88,17 @@ void main() {
         );
 
         verify(
-          () => client.post(Uri.https(kBaseUrl, kCreateUserEndpoint),
-              body: jsonEncode(
-                {
-                  'createdAt': params.createdAt,
-                  'name': params.name,
-                  'avatar': params.avatar,
-                },
-              )),
+          () => client.post(
+            Uri.https(kBaseUrl, kCreateUserEndpoint),
+            body: jsonEncode(
+              {
+                'createdAt': params.createdAt,
+                'name': params.name,
+                'avatar': params.avatar,
+              },
+            ),
+            headers: tHeaders,
+          ),
         ).called(1);
         verifyNoMoreInteractions(client);
       },
@@ -105,8 +118,7 @@ void main() {
         final tUsers = [const UserModel.empty()];
 
         // arrange
-        when(() => client.get(any())).thenAnswer((_) async =>
-            http.Response(jsonEncode([tUsers.first.toJson()]), 200));
+        when(() => client.get(any())).thenAnswer((_) async => http.Response(jsonEncode([tUsers.first.toMap()]), 200));
         // act
         final result = await remoteDataSource.getUsers();
         // assert
